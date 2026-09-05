@@ -9,6 +9,7 @@ CONTROLLERS_DIR=$(PROJECT_DIR)/controllers
 
 CONTROLLERS_SRC_CPP = \
 	$(CONTROLLERS_DIR)/actuators/electronic_throttle.cpp \
+	$(CONTROLLERS_DIR)/actuators/etb_bank_balance.cpp \
 	$(CONTROLLERS_DIR)/actuators/ac_control.cpp \
 	$(CONTROLLERS_DIR)/actuators/alternator_controller.cpp \
 	$(CONTROLLERS_DIR)/actuators/boost_control.cpp \

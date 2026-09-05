@@ -53,6 +53,7 @@
 #include "fuel_schedule.h"
 #include "prime_injection.h"
 #include "throttle_model.h"
+#include "etb_bank_balance.h"
 #include "gc_generic.h"
 #include "lambda_monitor.h"
 #include "efi_output.h"
@@ -166,6 +167,10 @@ public:
 #if EFI_ENGINE_CONTROL
         Mockable<ThrottleModel>,
 #endif // EFI_ENGINE_CONTROL
+#if EFI_ELECTRONIC_THROTTLE_BODY
+        // Prototype: MAF-based cylinder-bank ETB synchronization, see etb_bank_balance.h
+        EtbBankBalance,
+#endif // EFI_ELECTRONIC_THROTTLE_BODY
 #if EFI_ALTERNATOR_CONTROL
         AlternatorController,
 #endif /* EFI_ALTERNATOR_CONTROL */

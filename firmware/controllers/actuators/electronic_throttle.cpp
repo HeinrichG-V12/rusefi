@@ -400,7 +400,11 @@ float EtbController::getLuaAdjustment() const {
 }
 
 percent_t EtbController2::getThrottleTrim(float rpm, percent_t targetPosition) const {
-	return m_throttle2Trim.getValue(rpm, targetPosition);
+	// Static, user-calibrated bank-to-bank trim (fixed mechanical/manufacturing tolerance)
+	// plus the dynamic MAF-based bank balancer's current correction (see etb_bank_balance.cpp).
+	// EtbController1 gets only the dynamic half via the base class default - it has no static
+	// trim table of its own.
+	return m_throttle2Trim.getValue(rpm, targetPosition) + getEtbBankBalanceTrim(getFunction());
 }
 
 expected<percent_t> EtbController::getOpenLoop(percent_t target) {

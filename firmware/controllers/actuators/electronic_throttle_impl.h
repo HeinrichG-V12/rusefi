@@ -15,6 +15,7 @@
 #include "error_accumulator.h"
 #include "electronic_throttle_generated.h"
 #include "tunerstudio_calibration_channel.h"
+#include "etb_bank_balance.h"
 
 /**
  * Hard code ETB update speed.
@@ -64,8 +65,11 @@ public:
 	const pid_state_s& getPidState() const override { return m_pid; };
 
 	// Override if this throttle needs special per-throttle adjustment (bank-to-bank trim, for example)
+	// Default: no static per-rpm/tps trim table (that's EtbController2's job below), just whatever
+	// the dynamic MAF-based bank balancer currently wants for this throttle (0 for single-throttle
+	// engines, since EtbBankBalance disables itself without a second MAF/ETB - see etb_bank_balance.cpp).
 	virtual percent_t getThrottleTrim(float /*rpm*/, percent_t /*targetPosition*/) const {
-		return 0;
+		return getEtbBankBalanceTrim(getFunction());
 	}
 
   // pedal-based part of ETB target, without idle and other interventions
