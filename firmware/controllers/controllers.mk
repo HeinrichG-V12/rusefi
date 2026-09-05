@@ -55,6 +55,7 @@ CONTROLLERS_SRC_CPP = \
 	$(CONTROLLERS_DIR)/can/can_dash_nissan.cpp \
 	$(CONTROLLERS_DIR)/can/can_dash_haltech.cpp \
 	$(CONTROLLERS_DIR)/can/can_dash_honda.cpp \
+	$(CONTROLLERS_DIR)/can/can_dash_bmw_e46_m3.cpp \
 	$(CONTROLLERS_DIR)/can/can_vss.cpp \
 	$(CONTROLLERS_DIR)/can/can_sniffer.cpp \
 	$(CONTROLLERS_DIR)/can/isotp/isotp.cpp \

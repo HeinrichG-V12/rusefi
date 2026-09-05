@@ -389,6 +389,8 @@ const char *getCan_nbc_e(can_nbc_e value) {
 			return "CAN_AIM_DASH";
 		case CAN_BUS_BMW_E46:
 			return "CAN_BUS_BMW_E46";
+		case CAN_BUS_BMW_E46_M3:
+			return "CAN_BUS_BMW_E46_M3";
 		case CAN_BUS_BMW_E90:
 			return "CAN_BUS_BMW_E90";
 		case CAN_BUS_GENESIS_COUPE:

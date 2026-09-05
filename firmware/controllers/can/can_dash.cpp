@@ -18,6 +18,7 @@
 #include "can_bmw.h"
 #include "can_vag.h"
 #include "can_dash_honda.h"
+#include "can_dash_bmw_e46_m3.h"
 
 #include "rusefi_types.h"
 #include "rtc_helper.h"
@@ -637,6 +638,9 @@ void updateDash(CanCycle cycle) {
 		break;
 	case CAN_BUS_BMW_E46:
 		canDashboardBmwE46(cycle);
+		break;
+	case CAN_BUS_BMW_E46_M3:
+		canDashboardBmwE46M3(cycle);
 		break;
 	case CAN_BUS_Haltech:
 		canDashboardHaltech(cycle);
