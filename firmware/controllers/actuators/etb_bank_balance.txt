@@ -1,0 +1,21 @@
+! units,scale,offset,min,max,digits
+!
+! Live data for EtbBankBalance (see etb_bank_balance.h/.cpp). The trim value
+! itself is already visible per-throttle via electronic_throttle_s::trim
+! (ETB1/ETB2 "ETB: trim" gauges) - this struct carries the diagnostics that
+! aren't otherwise observable: why the balancer is (not) trimming right now,
+! and the raw bank-to-bank MAF delta driving it.
+
+struct_no_prefix etb_bank_balance_s
+
+	! EtbBankBalanceState: 0=Disabled 1=Adapting 2=Converged 3=Fault
+	uint8_t state;ETB balance: state
+
+	float deltaPercent;"ETB balance: MAF delta";"%", 1, 0, -100, 100, 2,@@GAUGE_CATEGORY_ETB@@
+
+	! Combined trim, bank1 sign convention (bank2 gauge is the negated value) -
+	! same number as electronic_throttle_s::trim on ETB1, duplicated here so it
+	! can be logged/graphed as a single channel without picking a throttle index.
+	float trim;"ETB balance: trim";"%", 1, 0, -100, 100, 2,@@GAUGE_CATEGORY_ETB@@
+
+end_struct

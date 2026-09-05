@@ -3,7 +3,8 @@
  *
  * Cylinder-bank throttle synchronization ("ETB balancing") for engines with
  * two independent electronic throttle bodies and two MAF sensors, one pair
- * per bank (e.g. BMW M70/M73 V12 with a MSS54-style DME-per-bank + EML setup).
+ * per bank (e.g. a BMW V12 with one DME per bank plus an EML: M70 with
+ * DME 1.7 + EML 1.2, or M73 with DME 5.2 + EML III S).
  *
  * rusEFI has no notion of a "bank" for computation - MafAirmass::getMaf()
  * simply sums MAF1+MAF2 into one shared airmass/ti (see maf_airmass.cpp).
@@ -31,7 +32,11 @@
 #include "engine_module.h"
 #include "rusefi_types.h"
 #include "rusefi_enums.h"
+#include "etb_bank_balance_generated.h"
 
+// Keep in sync with the "0=Disabled 1=Adapting 2=Converged 3=Fault" comment
+// on etb_bank_balance_s::state in etb_bank_balance.txt - TS reads that field
+// as a raw uint8_t, this is the firmware-side view of the same values.
 enum class EtbBankBalanceState : uint8_t {
 	Disabled,  // preconditions not met (not idling, not calibrated, sensors invalid, ...) - trim held
 	Adapting,  // preconditions met, |delta| outside the deadband - actively nudging the trim
@@ -39,7 +44,11 @@ enum class EtbBankBalanceState : uint8_t {
 	Fault,     // |delta| too large to plausibly be a throttle mismatch - not trimmed, flagged instead
 };
 
-class EtbBankBalance : public EngineModule {
+// etb_bank_balance_s (generated from etb_bank_balance.txt) contributes the
+// live-data fields visible in TunerStudio/logs: state, deltaPercent, trim.
+// See etb_bank_balance.txt for field docs and etb_bank_balance.cpp for who
+// writes them.
+class EtbBankBalance : public etb_bank_balance_s, public EngineModule {
 public:
 	// EngineModule
 	void onSlowCallback() override;
@@ -49,22 +58,18 @@ public:
 	// Positive for DC_Throttle1, mirrored (negative) for DC_Throttle2, 0 otherwise.
 	percent_t getTrim(dc_function_e function) const;
 
-	EtbBankBalanceState getState() const { return m_state; }
+	EtbBankBalanceState getState() const { return static_cast<EtbBankBalanceState>(state); }
 	// Filtered (maf1 - maf2) / (maf1 + maf2) * 100, for logging/console/TS
-	float getDeltaPercent() const { return m_deltaPercent; }
+	float getDeltaPercent() const { return deltaPercent; }
 
 private:
 	bool checkPreconditions(float rpm) const;
 	void resetFilters();
-
-	EtbBankBalanceState m_state = EtbBankBalanceState::Disabled;
+	void setState(EtbBankBalanceState newState) { state = static_cast<uint8_t>(newState); }
 
 	float m_maf1Filtered = 0;
 	float m_maf2Filtered = 0;
 	bool m_filtersInitialized = false;
-
-	float m_deltaPercent = 0;  // for diagnostics
-	float m_trim = 0;          // current symmetric trim, bank1 sign, percent
 };
 
 // Global instance, wired into EtbController::getThrottleTrim() (see electronic_throttle_impl.h)

@@ -115,14 +115,14 @@ void EtbBankBalance::onEngineStop() {
 	// itself is intentionally left alone (it's a learned mechanical offset,
 	// still valid next time we're at idle).
 	resetFilters();
-	m_state = EtbBankBalanceState::Disabled;
+	setState(EtbBankBalanceState::Disabled);
 }
 
 void EtbBankBalance::onSlowCallback() {
 	float rpm = Sensor::getOrZero(SensorType::Rpm);
 
 	if (!checkPreconditions(rpm)) {
-		m_state = EtbBankBalanceState::Disabled;
+		setState(EtbBankBalanceState::Disabled);
 		resetFilters();
 		return;
 	}
@@ -142,41 +142,43 @@ void EtbBankBalance::onSlowCallback() {
 	float sum = m_maf1Filtered + m_maf2Filtered;
 	if (sum < 1.0f) {
 		// Both MAFs read ~zero - avoid a division blowup, just wait.
-		m_state = EtbBankBalanceState::Disabled;
+		setState(EtbBankBalanceState::Disabled);
 		return;
 	}
 
-	// Positive delta = bank 1 flows more than bank 2.
-	m_deltaPercent = 100.0f * (m_maf1Filtered - m_maf2Filtered) / sum;
+	// Positive delta = bank 1 flows more than bank 2. Written straight into
+	// the live-data field (etb_bank_balance.txt) so it shows up in TS/logs
+	// even while we're not actively trimming (Disabled/Converged/Fault).
+	deltaPercent = 100.0f * (m_maf1Filtered - m_maf2Filtered) / sum;
 
-	float absDelta = std::abs(m_deltaPercent);
+	float absDelta = std::abs(deltaPercent);
 
 	if (absDelta > kFaultPercent) {
 		// Bosch doesn't trim through this - it's not plausibly a throttle
 		// mismatch anymore. Freeze the trim and flag it; let something
 		// upstream (OBD code / console warning) surface this to the user.
-		if (m_state != EtbBankBalanceState::Fault) {
-			efiPrintf("ETB bank balance: delta %.1f%% exceeds fault threshold (%.1f%%), disabling trim", m_deltaPercent, kFaultPercent);
+		if (getState() != EtbBankBalanceState::Fault) {
+			efiPrintf("ETB bank balance: delta %.1f%% exceeds fault threshold (%.1f%%), disabling trim", deltaPercent, kFaultPercent);
 		}
-		m_state = EtbBankBalanceState::Fault;
+		setState(EtbBankBalanceState::Fault);
 		return;
 	}
 
 	if (absDelta < kDeadbandPercent) {
-		m_state = EtbBankBalanceState::Converged;
+		setState(EtbBankBalanceState::Converged);
 		return;
 	}
 
-	m_state = EtbBankBalanceState::Adapting;
+	setState(EtbBankBalanceState::Adapting);
 
-	float step = clampF(-kMaxTrimStepPerTick, m_deltaPercent * kGain, kMaxTrimStepPerTick);
-	m_trim = clampF(-kMaxTrim, m_trim + step, kMaxTrim);
+	float step = clampF(-kMaxTrimStepPerTick, deltaPercent * kGain, kMaxTrimStepPerTick);
+	trim = clampF(-kMaxTrim, trim + step, kMaxTrim);
 }
 
 percent_t EtbBankBalance::getTrim(dc_function_e function) const {
 	switch (function) {
-		case DC_Throttle1: return m_trim;
-		case DC_Throttle2: return -m_trim;
+		case DC_Throttle1: return trim;
+		case DC_Throttle2: return -trim;
 		default: return 0;
 	}
 }

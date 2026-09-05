@@ -114,6 +114,14 @@ Usages:
     engineModule: AcController
     conditional_compilation: "FULL_SD_LOGS"
 
+  - name: etb_bank_balance
+    java: EtbBankBalance.java
+    folder: controllers/actuators
+    prepend: integration/rusefi_config_shared.txt
+    output_name: etbBalance
+    engineModule: EtbBankBalance
+    conditional_compilation: "EFI_ELECTRONIC_THROTTLE_BODY"
+
   - name: nitrous_control_state
     java: NitrousControl.java
     folder: controllers/algo

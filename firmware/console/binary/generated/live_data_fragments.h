@@ -13,6 +13,7 @@ decl_frag<shift_torque_reduction_state_s>{},
 decl_frag<antilag_system_state_s>{},
 decl_frag<boost_control_s>{},
 decl_frag<ac_control_s>{},
+decl_frag<etb_bank_balance_s>{},
 decl_frag<nitrous_control_state_s>{},
 decl_frag<fan_control_s, 0>{},	// fan1
 decl_frag<fan_control_s, 1>{},	// fan2

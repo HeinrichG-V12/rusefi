@@ -6,6 +6,7 @@
 #include "misfire_detection.h"
 #include "wideband_state_generated.h"
 #include "electronic_throttle_impl.h"
+#include "etb_bank_balance.h"
 #include "knock_controller_generated.h"
 #include "tcu_controller_generated.h"
 #include "fuel_computer.h"
@@ -144,6 +145,15 @@ const nitrous_control_state_s* getLiveData(size_t) {
 #else
     return nullptr;
 #endif // EFI_LAUNCH_CONTROL
+}
+
+template<>
+const etb_bank_balance_s* getLiveData(size_t) {
+#if EFI_ELECTRONIC_THROTTLE_BODY
+	return &engine->module<EtbBankBalance>().unmock();
+#else
+	return nullptr;
+#endif // EFI_ELECTRONIC_THROTTLE_BODY
 }
 
 template<>
