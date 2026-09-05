@@ -35,8 +35,8 @@
 #include "etb_bank_balance_generated.h"
 
 // Keep in sync with the "0=Disabled 1=Adapting 2=Converged 3=Fault" comment
-// on etb_bank_balance_s::state in etb_bank_balance.txt - TS reads that field
-// as a raw uint8_t, this is the firmware-side view of the same values.
+// on etb_bank_balance_s::etbBalanceState in etb_bank_balance.txt - TS reads
+// that field as a raw uint8_t, this is the firmware-side view of the same values.
 enum class EtbBankBalanceState : uint8_t {
 	Disabled,  // preconditions not met (not idling, not calibrated, sensors invalid, ...) - trim held
 	Adapting,  // preconditions met, |delta| outside the deadband - actively nudging the trim
@@ -45,9 +45,9 @@ enum class EtbBankBalanceState : uint8_t {
 };
 
 // etb_bank_balance_s (generated from etb_bank_balance.txt) contributes the
-// live-data fields visible in TunerStudio/logs: state, deltaPercent, trim.
-// See etb_bank_balance.txt for field docs and etb_bank_balance.cpp for who
-// writes them.
+// live-data fields visible in TunerStudio/logs: etbBalanceState,
+// etbBalanceDeltaPercent, etbBalanceTrim. See etb_bank_balance.txt for field
+// docs and etb_bank_balance.cpp for who writes them.
 class EtbBankBalance : public etb_bank_balance_s, public EngineModule {
 public:
 	// EngineModule
@@ -58,14 +58,14 @@ public:
 	// Positive for DC_Throttle1, mirrored (negative) for DC_Throttle2, 0 otherwise.
 	percent_t getTrim(dc_function_e function) const;
 
-	EtbBankBalanceState getState() const { return static_cast<EtbBankBalanceState>(state); }
+	EtbBankBalanceState getState() const { return static_cast<EtbBankBalanceState>(etbBalanceState); }
 	// Filtered (maf1 - maf2) / (maf1 + maf2) * 100, for logging/console/TS
-	float getDeltaPercent() const { return deltaPercent; }
+	float getDeltaPercent() const { return etbBalanceDeltaPercent; }
 
 private:
 	bool checkPreconditions(float rpm) const;
 	void resetFilters();
-	void setState(EtbBankBalanceState newState) { state = static_cast<uint8_t>(newState); }
+	void setState(EtbBankBalanceState newState) { etbBalanceState = static_cast<uint8_t>(newState); }
 
 	float m_maf1Filtered = 0;
 	float m_maf2Filtered = 0;

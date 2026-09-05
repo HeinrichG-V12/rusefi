@@ -1307,15 +1307,15 @@ float getOutputValueByHash(const int hash) {
 		case 1691876092:
 			return engine->dc_motors.isEnabled0;
 #if EFI_ELECTRONIC_THROTTLE_BODY
-// state
-		case 274811398:
-			return engine->module<EtbBankBalance>()->state;
-// deltaPercent
-		case -1200921632:
-			return engine->module<EtbBankBalance>()->deltaPercent;
-// trim
-		case 2090770017:
-			return engine->module<EtbBankBalance>()->trim;
+// etbBalanceState
+		case -1715470169:
+			return engine->module<EtbBankBalance>()->etbBalanceState;
+// etbBalanceDeltaPercent
+		case -1362609311:
+			return engine->module<EtbBankBalance>()->etbBalanceDeltaPercent;
+// etbBalanceTrim
+		case 1640006882:
+			return engine->module<EtbBankBalance>()->etbBalanceTrim;
 #endif
 #if EFI_ENGINE_CONTROL
 // totalFuelCorrection

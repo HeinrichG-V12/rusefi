@@ -6,10 +6,10 @@
 // start of etb_bank_balance_s
 struct etb_bank_balance_s {
 	/**
-	 * ETB balance: state
+	 * "ETB balance: state"
 	 * offset 0
 	 */
-	uint8_t state = (uint8_t)0;
+	uint8_t etbBalanceState = (uint8_t)0;
 	/**
 	 * need 4 byte alignment
 	 * units: units
@@ -21,13 +21,13 @@ struct etb_bank_balance_s {
 	 * units: %
 	 * offset 4
 	 */
-	float deltaPercent = (float)0;
+	float etbBalanceDeltaPercent = (float)0;
 	/**
 	 * "ETB balance: trim"
 	 * units: %
 	 * offset 8
 	 */
-	float trim = (float)0;
+	float etbBalanceTrim = (float)0;
 };
 static_assert(sizeof(etb_bank_balance_s) == 12);
 

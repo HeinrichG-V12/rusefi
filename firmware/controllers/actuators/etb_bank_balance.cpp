@@ -149,16 +149,16 @@ void EtbBankBalance::onSlowCallback() {
 	// Positive delta = bank 1 flows more than bank 2. Written straight into
 	// the live-data field (etb_bank_balance.txt) so it shows up in TS/logs
 	// even while we're not actively trimming (Disabled/Converged/Fault).
-	deltaPercent = 100.0f * (m_maf1Filtered - m_maf2Filtered) / sum;
+	etbBalanceDeltaPercent = 100.0f * (m_maf1Filtered - m_maf2Filtered) / sum;
 
-	float absDelta = std::abs(deltaPercent);
+	float absDelta = std::abs(etbBalanceDeltaPercent);
 
 	if (absDelta > kFaultPercent) {
 		// Bosch doesn't trim through this - it's not plausibly a throttle
 		// mismatch anymore. Freeze the trim and flag it; let something
 		// upstream (OBD code / console warning) surface this to the user.
 		if (getState() != EtbBankBalanceState::Fault) {
-			efiPrintf("ETB bank balance: delta %.1f%% exceeds fault threshold (%.1f%%), disabling trim", deltaPercent, kFaultPercent);
+			efiPrintf("ETB bank balance: delta %.1f%% exceeds fault threshold (%.1f%%), disabling trim", etbBalanceDeltaPercent, kFaultPercent);
 		}
 		setState(EtbBankBalanceState::Fault);
 		return;
@@ -171,14 +171,14 @@ void EtbBankBalance::onSlowCallback() {
 
 	setState(EtbBankBalanceState::Adapting);
 
-	float step = clampF(-kMaxTrimStepPerTick, deltaPercent * kGain, kMaxTrimStepPerTick);
-	trim = clampF(-kMaxTrim, trim + step, kMaxTrim);
+	float step = clampF(-kMaxTrimStepPerTick, etbBalanceDeltaPercent * kGain, kMaxTrimStepPerTick);
+	etbBalanceTrim = clampF(-kMaxTrim, etbBalanceTrim + step, kMaxTrim);
 }
 
 percent_t EtbBankBalance::getTrim(dc_function_e function) const {
 	switch (function) {
-		case DC_Throttle1: return trim;
-		case DC_Throttle2: return -trim;
+		case DC_Throttle1: return etbBalanceTrim;
+		case DC_Throttle2: return -etbBalanceTrim;
 		default: return 0;
 	}
 }

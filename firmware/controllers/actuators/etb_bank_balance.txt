@@ -9,13 +9,17 @@
 struct_no_prefix etb_bank_balance_s
 
 	! EtbBankBalanceState: 0=Disabled 1=Adapting 2=Converged 3=Fault
-	uint8_t state;ETB balance: state
+	! Named etbBalance* (not just "state") because this is a single-instance
+	! engineModule entry in LiveData.yaml - unlike electronic_throttle's
+	! isPtr entries, those do NOT get auto-prefixed with output_name, so a
+	! bare "state"/"trim" would land in TS's flat channel namespace as-is.
+	uint8_t etbBalanceState;"ETB balance: state";"", 1, 0, 0, 3, 0,@@GAUGE_CATEGORY_ETB@@
 
-	float deltaPercent;"ETB balance: MAF delta";"%", 1, 0, -100, 100, 2,@@GAUGE_CATEGORY_ETB@@
+	float etbBalanceDeltaPercent;"ETB balance: MAF delta";"%", 1, 0, -100, 100, 2,@@GAUGE_CATEGORY_ETB@@
 
 	! Combined trim, bank1 sign convention (bank2 gauge is the negated value) -
 	! same number as electronic_throttle_s::trim on ETB1, duplicated here so it
 	! can be logged/graphed as a single channel without picking a throttle index.
-	float trim;"ETB balance: trim";"%", 1, 0, -100, 100, 2,@@GAUGE_CATEGORY_ETB@@
+	float etbBalanceTrim;"ETB balance: trim";"%", 1, 0, -100, 100, 2,@@GAUGE_CATEGORY_ETB@@
 
 end_struct
